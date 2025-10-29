@@ -50,9 +50,10 @@ FinanceHub/
 ├── frontend/               # React + TypeScript frontend
 │   ├── src/
 │   │   ├── components/    # Reusable UI components
-│   │   ├── pages/         # Page components
+│   │   ├── pages/         # Page components (11 pages)
 │   │   ├── services/      # API client
 │   │   ├── types/         # TypeScript types
+│   │   ├── wailsjs/       # Auto-generated Wails bindings
 │   │   ├── App.tsx        # Main app component
 │   │   ├── main.tsx       # Application entry
 │   │   └── theme.ts       # Material UI theme
@@ -60,14 +61,22 @@ FinanceHub/
 │   ├── vite.config.ts     # Vite configuration
 │   └── tsconfig.json      # TypeScript configuration
 │
+├── models/                # Go data models (shared)
+├── services/              # Go services (shared)
+├── handlers/              # API route handlers
+├── app.go                 # Wails Go bindings
+├── main.go                # Wails desktop entry point
+├── wails.json             # Wails configuration
+├── build-wails.bat        # Build automation script
 └── README.md              # This file
 ```
 
 ## 🛠️ Technology Stack
 
 ### Desktop Application (Wails)
-- **Wails v2.8.0**: Go + Web frontend framework for desktop apps
+- **Wails v2.10.2**: Go + Web frontend framework for desktop apps
 - **WebView2**: Native Windows webview integration
+- **Go 1.23**: High-performance backend
 
 ### Backend
 - **Go 1.21+**: High-performance backend language
@@ -97,34 +106,48 @@ FinanceHub can be run in two modes:
 ### Desktop Application Setup (Wails)
 
 **Prerequisites:**
-- Go 1.21+ ([Download](https://golang.org/dl/))
+- Go 1.23+ ([Download](https://golang.org/dl/))
 - Node.js 18+ ([Download](https://nodejs.org/))
 - Wails CLI (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`)
 - WebView2 Runtime (Windows 10/11 usually has this)
 
-**Quick Start:**
+**Quick Build & Run:**
 ```bash
-# Install dependencies and start dev server
-wails dev
-
-# Or use the convenience script
-dev-wails.bat
-```
-
-**Build Desktop App:**
-```bash
-# Build production executable
+# Build the desktop application
 wails build -clean
 
-# Or use the convenience script
-build-wails.bat
+# Run the executable
+./build/bin/FinanceHub.exe
 ```
+
+**Alternative - Using Scripts:**
+```bash
+# Build production executable
+build-wails.bat
+
+# Run the app
+./build/bin/FinanceHub.exe
+```
+
+**Note:** `wails dev` may hang on some systems. Use `wails build -debug` instead for development builds.
 
 See [WAILS_SETUP.md](WAILS_SETUP.md) for complete desktop application documentation.
 
 ### Web Application Setup (Development)
 
-### Prerequisites
+**Quick Start:**
+```bash
+# Automated setup and launch (recommended)
+./setup.bat
+./start-dev.bat
+```
+
+This will:
+- Install all dependencies
+- Create `.env` file
+- Start backend (port 8080) and frontend (port 5173)
+
+### Manual Prerequisites
 
 - **Go 1.21 or higher**: [Download Go](https://golang.org/dl/)
 - **Node.js 18+ and npm**: [Download Node.js](https://nodejs.org/)
@@ -182,6 +205,21 @@ See [WAILS_SETUP.md](WAILS_SETUP.md) for complete desktop application documentat
 
    The application will open at `http://localhost:5173`
 
+### 🎯 Quick Command Reference
+
+**Desktop Mode:**
+```bash
+wails build -clean              # Build production executable
+wails build -debug              # Build with dev tools enabled
+./build/bin/FinanceHub.exe      # Run the desktop app
+```
+
+**Web Development Mode:**
+```bash
+./setup.bat                     # First-time setup
+./start-dev.bat                 # Start backend + frontend
+```
+
 ## 🔑 API Key Configuration
 
 ### Alpha Vantage API Key
@@ -200,25 +238,45 @@ See [WAILS_SETUP.md](WAILS_SETUP.md) for complete desktop application documentat
 
 CoinGecko's public API is used for cryptocurrency data and doesn't require an API key for basic usage.
 
-## 📡 API Endpoints
+## 📡 API Endpoints & Wails Bindings
 
-### Topics
+### Web Mode - REST API Endpoints
+
+**Topics:**
 - `GET /api/topics` - Get all finance topics
 - `GET /api/topics/:id` - Get specific topic by ID
 
-### Stocks
+**Stocks:**
 - `GET /api/stocks/:symbol` - Get real-time stock quote
 - `GET /api/stocks/:symbol/timeseries` - Get historical stock data (30 days)
 
-### Cryptocurrencies
+**Cryptocurrencies:**
 - `GET /api/crypto/top` - Get top 10 cryptocurrencies
 - `GET /api/crypto/:id` - Get specific cryptocurrency price
 
-### Currency Exchange
+**Currency Exchange:**
 - `GET /api/currency/:from/:to` - Get exchange rate between currencies
 
-### Health Check
+**Health Check:**
 - `GET /api/health` - API health status
+
+### Desktop Mode - Wails Go Bindings
+
+The desktop application exposes Go functions directly to the frontend:
+
+```typescript
+import { Greet, GetFinanceTopics, GetTopicByID, GetSystemInfo, GetAppVersion } from '../wailsjs/go/main/App';
+
+// Available functions:
+Greet(name: string): Promise<string>
+GetFinanceTopics(): Promise<FinanceTopic[]>
+GetTopicByID(id: string): Promise<FinanceTopic>
+GetSystemInfo(): Promise<Record<string, string>>
+GetAppVersion(): Promise<string>
+IsProduction(): Promise<boolean>
+```
+
+Test the bindings at `/wails-test` route in the desktop app.
 
 ## 🎨 Frontend Pages
 
