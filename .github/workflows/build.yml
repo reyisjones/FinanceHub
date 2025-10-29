@@ -233,7 +233,7 @@ jobs:
           
           ### 📖 Documentation
           
-          See [WAILS_SETUP.md](https://github.com/reyisjones/FinanceHub/blob/master/WAILS_SETUP.md) for installation and usage instructions.
+          See [WAILS_SETUP.md](https://github.com/reyisjones/FinanceHub/blob/master/docs/WAILS_SETUP.md) for installation and usage instructions.
           EOF
           
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT

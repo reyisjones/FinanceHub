@@ -160,7 +160,7 @@ build-wails.bat
 
 **Note:** `wails dev` may hang on some systems. Use `wails build -debug` instead for development builds.
 
-See [WAILS_SETUP.md](WAILS_SETUP.md) for complete desktop application documentation.
+See [docs/WAILS_SETUP.md](docs/WAILS_SETUP.md) for complete desktop application documentation.
 
 ### Web Application Setup (Development)
 
@@ -443,7 +443,7 @@ Build signed releases with GitHub Actions:
 2. Create a git tag: `git tag v1.0.0 && git push origin v1.0.0`
 3. GitHub Actions automatically builds, signs, and releases
 
-See [WAILS_SETUP.md](WAILS_SETUP.md) for complete details.
+See [docs/WAILS_SETUP.md](docs/WAILS_SETUP.md) for complete details.
 
 ## 📝 Notes
 
@@ -473,10 +473,10 @@ Contributions, issues, and feature requests are welcome!
 
 ## 📚 Documentation
 
-- **[WAILS_SETUP.md](WAILS_SETUP.md)** - Complete Wails desktop application guide
-- **[SETUP.md](SETUP.md)** - General setup instructions
-- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Project overview and architecture
-- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick reference guide
+- **[docs/WAILS_SETUP.md](docs/WAILS_SETUP.md)** - Complete Wails desktop application guide
+- **[docs/SETUP.md](docs/SETUP.md)** - General setup instructions
+- **[docs/PROJECT_SUMMARY.md](docs/PROJECT_SUMMARY.md)** - Project overview and architecture
+- **[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - Quick reference guide
 
 ## 📧 Support
 
