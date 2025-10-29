@@ -1,5 +1,7 @@
 # FinanceHub - Finance Learning & Insights Web Application
 
+![FinanceHub Menu](menu.png)
+
 A comprehensive full-stack web application for financial education and real-time market insights. Built with **Go (Golang)** backend and **Material UI + Vite + TypeScript** frontend.
 
 ## 🌟 Features
@@ -15,8 +17,6 @@ A comprehensive full-stack web application for financial education and real-time
   - Fintech
   - Risk Management
   - Global Economy
-
-![alt text](image.png)
 
 - **📊 Real-Time Market Data**: 
   - Live stock quotes and historical charts
