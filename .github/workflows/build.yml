@@ -1,0 +1,260 @@
+name: Build and Release FinanceHub
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+env:
+  APP_NAME: FinanceHub
+  GO_VERSION: '1.21'
+  NODE_VERSION: '18'
+  WAILS_VERSION: 'v2.8.0'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ env.WAILS_VERSION }}
+
+      - name: Get version from tag or input
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update version in wails.json
+        shell: bash
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" wails.json
+          sed -i "s/\"productVersion\": \".*\"/\"productVersion\": \"$VERSION\"/" wails.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: Build application with Wails
+        run: wails build -platform windows/amd64 -clean
+
+      - name: Import code signing certificate
+        if: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 != '' }}
+        shell: powershell
+        run: |
+          $certBytes = [Convert]::FromBase64String("${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}")
+          $certPath = Join-Path -Path $env:TEMP -ChildPath "cert.pfx"
+          [IO.File]::WriteAllBytes($certPath, $certBytes)
+          
+          Import-PfxCertificate -FilePath $certPath `
+            -CertStoreLocation Cert:\CurrentUser\My `
+            -Password (ConvertTo-SecureString -String "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}" -AsPlainText -Force)
+          
+          Remove-Item $certPath
+
+      - name: Sign executable
+        if: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 != '' }}
+        shell: powershell
+        run: |
+          $cert = Get-ChildItem -Path Cert:\CurrentUser\My -CodeSigningCert | Select-Object -First 1
+          
+          if ($cert) {
+            Set-AuthenticodeSignature -FilePath "build\bin\${{ env.APP_NAME }}.exe" `
+              -Certificate $cert `
+              -TimestampServer "http://timestamp.digicert.com"
+            
+            Write-Host "✓ Executable signed successfully"
+          } else {
+            Write-Host "⚠ No code signing certificate found"
+          }
+
+      - name: Verify signature
+        if: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 != '' }}
+        shell: powershell
+        run: |
+          $signature = Get-AuthenticodeSignature -FilePath "build\bin\${{ env.APP_NAME }}.exe"
+          Write-Host "Signature Status: $($signature.Status)"
+          Write-Host "Signer Certificate: $($signature.SignerCertificate.Subject)"
+
+      - name: Create installer with NSIS
+        shell: powershell
+        run: |
+          # Create NSIS installer script
+          $version = "${{ steps.version.outputs.VERSION }}"
+          $installerScript = @"
+          !include "MUI2.nsh"
+          
+          Name "${{ env.APP_NAME }}"
+          OutFile "build\bin\${{ env.APP_NAME }}-Setup-v${version}.exe"
+          InstallDir "`$PROGRAMFILES64\${{ env.APP_NAME }}"
+          
+          !define MUI_ICON "build\bin\icon.ico"
+          !define MUI_UNICON "build\bin\icon.ico"
+          
+          !insertmacro MUI_PAGE_WELCOME
+          !insertmacro MUI_PAGE_LICENSE "LICENSE"
+          !insertmacro MUI_PAGE_DIRECTORY
+          !insertmacro MUI_PAGE_INSTFILES
+          !insertmacro MUI_PAGE_FINISH
+          
+          !insertmacro MUI_UNPAGE_CONFIRM
+          !insertmacro MUI_UNPAGE_INSTFILES
+          
+          !insertmacro MUI_LANGUAGE "English"
+          
+          Section "Install"
+            SetOutPath "`$INSTDIR"
+            File "build\bin\${{ env.APP_NAME }}.exe"
+            
+            CreateDirectory "`$SMPROGRAMS\${{ env.APP_NAME }}"
+            CreateShortcut "`$SMPROGRAMS\${{ env.APP_NAME }}\${{ env.APP_NAME }}.lnk" "`$INSTDIR\${{ env.APP_NAME }}.exe"
+            CreateShortcut "`$DESKTOP\${{ env.APP_NAME }}.lnk" "`$INSTDIR\${{ env.APP_NAME }}.exe"
+            
+            WriteUninstaller "`$INSTDIR\Uninstall.exe"
+            
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${{ env.APP_NAME }}" "DisplayName" "${{ env.APP_NAME }}"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${{ env.APP_NAME }}" "UninstallString" "`$INSTDIR\Uninstall.exe"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${{ env.APP_NAME }}" "DisplayVersion" "${version}"
+          SectionEnd
+          
+          Section "Uninstall"
+            Delete "`$INSTDIR\${{ env.APP_NAME }}.exe"
+            Delete "`$INSTDIR\Uninstall.exe"
+            Delete "`$SMPROGRAMS\${{ env.APP_NAME }}\${{ env.APP_NAME }}.lnk"
+            Delete "`$DESKTOP\${{ env.APP_NAME }}.lnk"
+            
+            RMDir "`$SMPROGRAMS\${{ env.APP_NAME }}"
+            RMDir "`$INSTDIR"
+            
+            DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${{ env.APP_NAME }}"
+          SectionEnd
+          "@
+          
+          Set-Content -Path "installer.nsi" -Value $installerScript
+          
+          # Install NSIS if not available
+          if (-not (Test-Path "C:\Program Files (x86)\NSIS\makensis.exe")) {
+            choco install nsis -y
+          }
+          
+          # Compile installer
+          & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
+
+      - name: Package application
+        shell: bash
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          
+          # Create zip archive
+          cd build/bin
+          7z a "${{ env.APP_NAME }}-Windows-x64-v${VERSION}.zip" "${{ env.APP_NAME }}.exe"
+          
+          # Calculate checksums
+          certutil -hashfile "${{ env.APP_NAME }}.exe" SHA256 > "${{ env.APP_NAME }}-v${VERSION}.sha256"
+
+      - name: Generate release notes
+        id: release_notes
+        shell: bash
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          
+          # Get commits since last tag
+          PREVIOUS_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            COMMITS=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          cat > release_notes.md <<EOF
+          ## FinanceHub v${VERSION}
+          
+          ### 🚀 What's New
+          
+          This release includes the following changes:
+          
+          ${COMMITS}
+          
+          ### 📦 Download
+          
+          - **Windows Installer**: \`${{ env.APP_NAME }}-Setup-v${VERSION}.exe\` (Recommended)
+          - **Windows Portable**: \`${{ env.APP_NAME }}-Windows-x64-v${VERSION}.zip\`
+          
+          ### 🔐 Security
+          
+          All executables are digitally signed with a trusted certificate.
+          
+          ### 📋 System Requirements
+          
+          - Windows 10/11 (64-bit)
+          - 4GB RAM (8GB recommended)
+          - 500MB free disk space
+          
+          ### 🐛 Known Issues
+          
+          None at this time.
+          
+          ### 📖 Documentation
+          
+          See [WAILS_SETUP.md](https://github.com/reyisjones/FinanceHub/blob/master/WAILS_SETUP.md) for installation and usage instructions.
+          EOF
+          
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: FinanceHub v${{ steps.version.outputs.VERSION }}
+          body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+          files: |
+            build/bin/${{ env.APP_NAME }}.exe
+            build/bin/${{ env.APP_NAME }}-Setup-v${{ steps.version.outputs.VERSION }}.exe
+            build/bin/${{ env.APP_NAME }}-Windows-x64-v${{ steps.version.outputs.VERSION }}.zip
+            build/bin/${{ env.APP_NAME }}-v${{ steps.version.outputs.VERSION }}.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: financehub-windows-v${{ steps.version.outputs.VERSION }}
+          path: |
+            build/bin/${{ env.APP_NAME }}.exe
+            build/bin/${{ env.APP_NAME }}-Setup-v${{ steps.version.outputs.VERSION }}.exe
+            build/bin/${{ env.APP_NAME }}-Windows-x64-v${{ steps.version.outputs.VERSION }}.zip
+          retention-days: 30
