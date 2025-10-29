@@ -16,6 +16,7 @@ import BankingPage from './pages/BankingPage';
 import FintechPage from './pages/FintechPage';
 import RiskManagementPage from './pages/RiskManagementPage';
 import GlobalEconomyPage from './pages/GlobalEconomyPage';
+import WailsTestPage from './pages/WailsTestPage';
 
 function App() {
   const [mode, setMode] = useState<'light' | 'dark'>('light');
@@ -44,6 +45,7 @@ function App() {
             <Route path="/fintech" element={<FintechPage />} />
             <Route path="/risk-management" element={<RiskManagementPage />} />
             <Route path="/global-economy" element={<GlobalEconomyPage />} />
+            <Route path="/wails-test" element={<WailsTestPage />} />
           </Routes>
         </Layout>
       </Router>
