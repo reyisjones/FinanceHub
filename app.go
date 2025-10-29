@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"financehub/backend/models"
-	"financehub/backend/services"
+	"financehub/models"
+	"financehub/services"
 	"fmt"
 	"runtime"
 )
