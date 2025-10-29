@@ -23,7 +23,7 @@
   "reloaddirs": "frontend/src,backend",
   "build:dir": "./build",
   "debounceMS": 750,
-  "devServer": "http://localhost:5173",
+  "devServer": "localhost:5173",
   "appargs": "",
   "runNonNativeBuildScript": false,
   "preBuildHooks": {
