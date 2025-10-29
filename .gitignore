@@ -17,6 +17,10 @@ wailsjs/
 .wails/
 *.wails.json
 
+# Build artifacts and cache
+*.md5
+package.json.md5
+
 # Windows Service Logs
 logs/
 *.log
