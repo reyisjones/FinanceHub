@@ -1,0 +1,86 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "FinanceHub",
+  "outputfilename": "FinanceHub",
+  "version": "1.0.0",
+  "author": {
+    "name": "FinanceHub Team",
+    "email": "support@financehub.com"
+  },
+  "info": {
+    "companyName": "FinanceHub",
+    "productName": "FinanceHub - Finance Learning & Insights",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright © 2025 FinanceHub",
+    "comments": "A comprehensive desktop application for financial education and real-time market insights"
+  },
+  "frontend:install": "cd frontend && npm install",
+  "frontend:build": "cd frontend && npm run build",
+  "frontend:dev:watcher": "cd frontend && npm run dev",
+  "frontend:dev:serverUrl": "http://localhost:5173",
+  "wailsjsdir": "./frontend/src",
+  "assetdir": "./frontend/dist",
+  "reloaddirs": "frontend/src,backend",
+  "build:dir": "./build",
+  "debounceMS": 750,
+  "devServer": "http://localhost:5173",
+  "appargs": "",
+  "runNonNativeBuildScript": false,
+  "preBuildHooks": {
+    "windows": "echo 'Building FinanceHub for Windows...'"
+  },
+  "postBuildHooks": {},
+  "author:name": "FinanceHub Team",
+  "author:email": "support@financehub.com",
+  "nsisType": "multiple",
+  "obfuscated": false,
+  "garbleargs": "",
+  "info:companyName": "FinanceHub",
+  "info:productName": "FinanceHub",
+  "info:fileDescription": "Finance Learning & Insights Desktop Application",
+  "info:copyright": "Copyright © 2025",
+  "info:comments": "Built with Wails and Material UI",
+  "info:productVersion": "1.0.0",
+  "windows": {
+    "hideConsole": true,
+    "webviewIsTransparent": false,
+    "windowIsTranslucent": false,
+    "disableWindowIcon": false,
+    "disableFramelessWindowDecorations": false,
+    "webviewUserDataPath": "",
+    "webviewBrowserPath": "",
+    "theme": "system",
+    "customTheme": {
+      "dark": {
+        "titleBar": "#1a1a1a",
+        "titleBarText": "#ffffff",
+        "background": "#121212"
+      },
+      "light": {
+        "titleBar": "#ffffff",
+        "titleBarText": "#000000",
+        "background": "#ffffff"
+      }
+    },
+    "wailsArguments": "",
+    "windowStartState": "Normal",
+    "resizable": true,
+    "fullscreenOnStartup": false,
+    "frameless": false,
+    "minWidth": 800,
+    "minHeight": 600,
+    "maxWidth": 0,
+    "maxHeight": 0,
+    "startHidden": false,
+    "windowLevel": "normal"
+  },
+  "linux": {
+    "icon": "appicon.png",
+    "deb": {
+      "homepage": "https://github.com/reyisjones/FinanceHub"
+    }
+  },
+  "mac": {
+    "icon": "appicon.png"
+  }
+}
