@@ -315,6 +315,8 @@ Test the bindings at `/wails-test` route in the desktop app.
 - **/bonds** - Bonds education page
 - **/cryptocurrencies** - Crypto prices and market data
 - **/personal-finance** - Personal finance guidance
+
+![alt text](pfinance.png)
 - **/real-estate** - Real estate investment information
 - **/banking** - Banking systems overview
 - **/fintech** - Financial technology insights
@@ -467,9 +469,249 @@ Potential features for future development:
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
+## � Unit Tests & Security Audit
+
+FinanceHub includes a comprehensive testing and security auditing framework to ensure code quality, reliability, and security across all components.
+
+### Test Coverage Areas
+
+#### 🎨 Frontend Tests (TypeScript/React)
+- **Component Tests**: UI component rendering and behavior
+- **API Integration Tests**: Service layer and HTTP requests
+- **User Interaction Tests**: Event handling and user flows
+- **Framework**: Vitest + React Testing Library
+
+#### ⚙️ Backend Tests (Go)
+- **Handler Tests**: HTTP endpoint validation and responses
+- **Service Tests**: Business logic and data processing
+- **Model Tests**: Data structure validation
+- **Integration Tests**: End-to-end API workflows
+- **Framework**: Go testing package + testify
+
+#### 📜 Script Validation Tests
+- **Syntax Validation**: PowerShell and Batch script syntax checking
+- **Structure Tests**: Required patterns and error handling
+- **Framework**: Custom PowerShell test suite
+
+#### 🔐 Security & Compliance Audit
+- **Secret Management**: Detection of hardcoded credentials and API keys
+- **Dependency Vulnerabilities**: npm and Go module vulnerability scanning
+- **Configuration Integrity**: Validation of config files and version management
+- **Code Quality**: Test coverage and linting compliance
+- **Security Best Practices**: HTTPS, CORS, security headers, SQL injection prevention
+- **CI/CD Security**: GitHub Actions workflow security validation
+
+### Running Tests Locally
+
+#### Run All Tests
+```powershell
+# Windows PowerShell
+./scripts/run-tests.ps1 -Suite all
+
+# Or individual suites
+./scripts/run-tests.ps1 -Suite backend
+./scripts/run-tests.ps1 -Suite frontend
+./scripts/run-tests.ps1 -Suite scripts
+./scripts/run-tests.ps1 -Suite audit
+```
+
+#### Run Tests with Coverage
+```powershell
+# Full test suite with coverage reports
+./scripts/run-tests.ps1 -Suite all -Coverage
+
+# Backend tests with coverage
+go test ./... -coverprofile=coverage.out
+go tool cover -html=coverage.out
+
+# Frontend tests with coverage
+cd frontend
+npm run test:coverage
+```
+
+#### Individual Test Commands
+
+**Backend (Go)**:
+```bash
+# Run all Go tests
+go test ./... -v
+
+# Run tests for specific package
+go test ./handlers -v
+go test ./services -v
+go test ./models -v
+
+# Run with race detection
+go test ./... -race
+
+# Run specific test
+go test -run TestGetTopicsHandler ./handlers
+```
+
+**Frontend (TypeScript/React)**:
+```bash
+cd frontend
+
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run with coverage
+npm run test:coverage
+```
+
+**Scripts**:
+```powershell
+# Validate all scripts
+./scripts/test-scripts.ps1
+```
+
+### Security Audit
+
+The security audit script performs comprehensive checks across the entire codebase:
+
+#### Run Security Audit
+```powershell
+# Run full audit
+./scripts/audit.ps1
+
+# Run with verbose output
+./scripts/audit.ps1 -Verbose
+
+# Export results to JSON
+./scripts/audit.ps1 -OutputFormat json
+```
+
+#### Audit Checks Include:
+
+1. **Secret Management**
+   - Scans for `.env` files in git
+   - Validates `.gitignore` patterns
+   - Detects hardcoded passwords, API keys, and tokens
+   - Checks for exposed GitHub tokens
+
+2. **Dependency Vulnerabilities**
+   - Verifies Go module integrity (`go mod verify`)
+   - Scans npm packages for known vulnerabilities
+   - Checks for outdated or vulnerable dependencies
+
+3. **Configuration Integrity**
+   - Validates required configuration files
+   - Checks JSON structure of `wails.json`
+   - Verifies semantic versioning in `VERSION` file
+
+4. **Code Quality**
+   - Ensures test files exist
+   - Validates linter configuration
+   - Runs test suites
+
+5. **Security Best Practices**
+   - HTTPS configuration check
+   - CORS middleware validation
+   - Security headers verification
+   - SQL injection vulnerability detection
+
+6. **CI/CD Security**
+   - GitHub Actions secret usage validation
+   - Action version pinning checks
+
+#### Audit Scoring
+
+The audit generates a security score based on:
+- **Pass Rate**: Percentage of checks passed
+- **Security Score**: Weighted score considering severity
+- **Exit Code**: Non-zero if critical issues found
+
+### Running Tests in CI/CD
+
+Tests run automatically on every push and pull request via GitHub Actions:
+
+- **Workflow**: `.github/workflows/test.yml`
+- **Triggers**: Push to master/main/develop, pull requests
+- **Jobs**:
+  - Backend Tests (Go)
+  - Frontend Tests (TypeScript/React)
+  - Security & Compliance Audit
+  - Script Validation
+  - Dependency Vulnerability Check
+
+#### View Test Results
+
+1. Go to **Actions** tab in GitHub repository
+2. Select **Test Suite** workflow
+3. View individual job results and coverage reports
+
+#### Coverage Reports
+
+Coverage reports are automatically generated and uploaded as artifacts:
+- **Backend**: `go-coverage/coverage.html`
+- **Frontend**: `frontend-coverage/index.html`
+- **Audit**: `audit-results.json`
+
+### Test Development Guidelines
+
+#### Adding New Tests
+
+**Backend (Go)**:
+```go
+// handlers/my_handler_test.go
+package handlers
+
+import (
+    "testing"
+    "github.com/stretchr/testify/assert"
+)
+
+func TestMyHandler(t *testing.T) {
+    // Test implementation
+    assert.Equal(t, expected, actual)
+}
+```
+
+**Frontend (TypeScript)**:
+```typescript
+// src/tests/MyComponent.test.tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import MyComponent from '../MyComponent';
+
+describe('MyComponent', () => {
+  it('renders correctly', () => {
+    render(<MyComponent />);
+    expect(screen.getByText('Hello')).toBeInTheDocument();
+  });
+});
+```
+
+#### Test Best Practices
+
+- ✅ Write tests for all new features
+- ✅ Maintain at least 70% code coverage
+- ✅ Use descriptive test names
+- ✅ Test edge cases and error handling
+- ✅ Mock external dependencies
+- ✅ Keep tests fast and isolated
+- ✅ Run tests before committing
+
+### Continuous Quality Assurance
+
+- **Pre-commit**: Run relevant tests locally
+- **PR Review**: Automated tests must pass
+- **Security Audit**: Regular vulnerability scans
+- **Dependency Updates**: Monitor and update dependencies
+- **Code Reviews**: Peer review for quality assurance
+
+## �🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!
+
+**Before submitting a PR**:
+1. Run all tests: `./scripts/run-tests.ps1 -Suite all`
+2. Run security audit: `./scripts/audit.ps1`
+3. Ensure code coverage is maintained
+4. Update tests for new features
 
 ## 📚 Documentation
 
