@@ -5,7 +5,9 @@ import (
 	"financehub/models"
 	"financehub/services"
 	"fmt"
+	"os"
 	"runtime"
+	"strings"
 )
 
 // App struct
@@ -47,18 +49,24 @@ func (a *App) GetTopicByID(id string) *models.FinanceTopic {
 
 // GetSystemInfo returns information about the system running the app
 func (a *App) GetSystemInfo() map[string]string {
+	version := a.GetAppVersion()
 	return map[string]string{
 		"os":         runtime.GOOS,
 		"arch":       runtime.GOARCH,
 		"goVersion":  runtime.Version(),
 		"numCPU":     fmt.Sprintf("%d", runtime.NumCPU()),
-		"appVersion": "1.0.0",
+		"appVersion": version,
 		"appName":    "FinanceHub",
 	}
 }
 
 // GetAppVersion returns the current application version
 func (a *App) GetAppVersion() string {
+	// Try to read from VERSION file
+	if content, err := os.ReadFile("VERSION"); err == nil {
+		return strings.TrimSpace(string(content))
+	}
+	// Fallback version
 	return "1.0.0"
 }
 

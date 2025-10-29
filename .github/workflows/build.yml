@@ -8,14 +8,14 @@ on:
     inputs:
       version:
         description: 'Release version (e.g., 1.0.0)'
-        required: true
-        default: '1.0.0'
+        required: false
+        default: ''
 
 env:
   APP_NAME: FinanceHub
-  GO_VERSION: '1.21'
+  GO_VERSION: '1.23'
   NODE_VERSION: '18'
-  WAILS_VERSION: 'v2.8.0'
+  WAILS_VERSION: 'v2.10.2'
 
 jobs:
   build-windows:
@@ -44,11 +44,18 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
             echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
+          elif [ "${{ github.ref_type }}" == "tag" ]; then
             echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          else
+            # Use VERSION file as fallback
+            VERSION=$(cat VERSION)
+            echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           fi
+          
+      - name: Display version
+        run: echo "Building version ${{ steps.version.outputs.VERSION }}"
 
       - name: Update version in wails.json
         shell: bash

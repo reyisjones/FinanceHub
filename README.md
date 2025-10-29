@@ -4,6 +4,35 @@
 
 A comprehensive full-stack web application for financial education and real-time market insights. Built with **Go (Golang)** backend and **Material UI + Vite + TypeScript** frontend.
 
+## 📥 Download
+
+### Latest Release
+
+Download the latest version of FinanceHub for Windows:
+
+**[Download FinanceHub v1.0.0](https://github.com/reyisjones/FinanceHub/releases/latest)**
+
+#### System Requirements
+- **OS**: Windows 10/11 (64-bit)
+- **Runtime**: WebView2 (pre-installed on Windows 10/11)
+- **Disk Space**: ~20 MB
+
+#### Installation
+1. Download `FinanceHub-v1.0.0-windows-amd64.exe` from the [Releases page](https://github.com/reyisjones/FinanceHub/releases)
+2. Run the installer and follow the setup wizard
+3. Launch FinanceHub from your Start Menu or Desktop shortcut
+
+#### What's Included
+- ✅ Desktop application with native Windows integration
+- ✅ All 10 finance learning modules
+- ✅ Real-time market data and charts
+- ✅ Dark/Light mode support
+- ✅ Offline-capable interface
+
+### Release Notes
+
+See the [Changelog](https://github.com/reyisjones/FinanceHub/releases) for version history and updates.
+
 ## 🌟 Features
 
 - **📚 10 Key Finance Topics**: Comprehensive educational content covering:
