@@ -76,6 +76,3 @@ lerna-debug.log*
 
 # Testing
 .nyc_output/
-
-# Go specific
-go.sum
