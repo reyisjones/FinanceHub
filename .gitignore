@@ -8,6 +8,19 @@ financehub
 *.out
 vendor/
 
+# Wails Build Output
+build/
+wailsjs/
+*.syso
+
+# Wails Development
+.wails/
+*.wails.json
+
+# Windows Service Logs
+logs/
+*.log
+
 # Frontend - Node
 node_modules/
 .pnp

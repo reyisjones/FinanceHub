@@ -65,6 +65,10 @@ FinanceHub/
 
 ## 🛠️ Technology Stack
 
+### Desktop Application (Wails)
+- **Wails v2.8.0**: Go + Web frontend framework for desktop apps
+- **WebView2**: Native Windows webview integration
+
 ### Backend
 - **Go 1.21+**: High-performance backend language
 - **Gin**: Web framework for routing and middleware
@@ -85,6 +89,40 @@ FinanceHub/
 - **CoinGecko**: Cryptocurrency prices and market data
 
 ## 🚀 Getting Started
+
+FinanceHub can be run in two modes:
+1. **Desktop Application** (Wails) - Recommended for end users
+2. **Web Application** (Separate frontend/backend) - For development
+
+### Desktop Application Setup (Wails)
+
+**Prerequisites:**
+- Go 1.21+ ([Download](https://golang.org/dl/))
+- Node.js 18+ ([Download](https://nodejs.org/))
+- Wails CLI (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`)
+- WebView2 Runtime (Windows 10/11 usually has this)
+
+**Quick Start:**
+```bash
+# Install dependencies and start dev server
+wails dev
+
+# Or use the convenience script
+dev-wails.bat
+```
+
+**Build Desktop App:**
+```bash
+# Build production executable
+wails build -clean
+
+# Or use the convenience script
+build-wails.bat
+```
+
+See [WAILS_SETUP.md](WAILS_SETUP.md) for complete desktop application documentation.
+
+### Web Application Setup (Development)
 
 ### Prerequisites
 
@@ -115,12 +153,15 @@ FinanceHub/
    go mod download
    ```
 
-5. **Run the backend server**:
+5. **Run the backend API server**:
    ```bash
+   cd backend
    go run main.go
    ```
 
    The API server will start on `http://localhost:8080`
+
+   **Note:** When running as a desktop app with Wails, you don't need to start the backend separately.
 
 ### Frontend Setup
 
@@ -279,6 +320,44 @@ Each finance topic includes:
 - Persistent user preference
 - Material UI theming system
 
+### ✅ Desktop Application Features
+- Native Windows desktop app with Wails
+- Go backend bindings for high performance
+- Windows Service support (auto-start, background execution)
+- Code signing ready for production distribution
+- Automated CI/CD with GitHub Actions
+
+## 🖥️ Desktop Application
+
+### Running as Windows Service
+
+Install FinanceHub to run in the background and auto-start with Windows:
+
+```bash
+# Run as Administrator
+service.bat install
+service.bat start
+```
+
+Manage the service:
+```bash
+service.bat stop      # Stop service
+service.bat restart   # Restart service
+service.bat uninstall # Remove service
+```
+
+Service logs: `logs/financehub_service.log`
+
+### Distribution
+
+Build signed releases with GitHub Actions:
+
+1. Add code signing certificate to repository secrets
+2. Create a git tag: `git tag v1.0.0 && git push origin v1.0.0`
+3. GitHub Actions automatically builds, signs, and releases
+
+See [WAILS_SETUP.md](WAILS_SETUP.md) for complete details.
+
 ## 📝 Notes
 
 - **API Rate Limits**: Be mindful of Alpha Vantage's rate limits (25 requests/day for free tier)
@@ -299,11 +378,18 @@ Potential features for future development:
 
 ## 📄 License
 
-This project is open source and available for educational purposes.
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!
+
+## 📚 Documentation
+
+- **[WAILS_SETUP.md](WAILS_SETUP.md)** - Complete Wails desktop application guide
+- **[SETUP.md](SETUP.md)** - General setup instructions
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Project overview and architecture
+- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick reference guide
 
 ## 📧 Support
 
@@ -311,4 +397,4 @@ For questions or support, please open an issue in the repository.
 
 ---
 
-**Built with ❤️ using Go and Material UI**
+**Built with ❤️ using Wails, Go, and Material UI**
