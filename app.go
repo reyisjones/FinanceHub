@@ -10,12 +10,15 @@ import (
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx           context.Context
+	topicsService *services.TopicsService
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	return &App{}
+	return &App{
+		topicsService: services.NewTopicsService(),
+	}
 }
 
 // startup is called when the app starts. The context is saved
@@ -34,12 +37,12 @@ func (a *App) Greet(name string) string {
 
 // GetFinanceTopics returns all 10 finance topics available in the application
 func (a *App) GetFinanceTopics() []models.FinanceTopic {
-	return services.GetAllTopics()
+	return a.topicsService.GetAllTopics()
 }
 
 // GetTopicByID returns a specific finance topic by its ID
-func (a *App) GetTopicByID(id int) *models.FinanceTopic {
-	return services.GetTopicByID(id)
+func (a *App) GetTopicByID(id string) *models.FinanceTopic {
+	return a.topicsService.GetTopicByID(id)
 }
 
 // GetSystemInfo returns information about the system running the app
